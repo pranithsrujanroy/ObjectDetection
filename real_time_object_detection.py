@@ -28,19 +28,26 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
 # initialize the video stream, allow the cammera sensor to warmup,
 # and initialize the FPS counter
+
+
+#To use the webcam set this variable to 1
+web_cam = 0
 print("[INFO] starting video stream...")
-#vs = VideoStream(src=0).start()
-vs = cv2.VideoCapture('video3.mp4')
-vs.set(cv2.CAP_PROP_FPS, 5)
-#time.sleep(2.0)
-#fps = FPS().start()
+if web_cam:
+	vs = VideoStream(src=0).start()
+	time.sleep(2.0)
+	fps = FPS().start()
+else:
+	vs = cv2.VideoCapture('video3.mp4')
+	vs.set(cv2.CAP_PROP_FPS, 5)
+#
 # loop over the frames from the video stream
 frame_count = 0
 while True:
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
 	frame_count +=1
-	success,frame = vs.read()
+	frame = vs.read()
 	#print("Read a new frame: ",success)
 	frame = imutils.resize(frame,640,480)
 
@@ -97,15 +104,16 @@ while True:
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break
-
+	if web_cam:
 	# update the FPS counter
-	#fps.update()
+		fps.update()
 # stop the timer and display FPS information
-#fps.stop()
-#print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
-#print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+if web_cam:
+	fps.stop()
+	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
+	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+	vs.stop()
 
 # do a bit of cleanup
-#vs.stop()
 cv2.destroyAllWindows()
 vs.release()
