@@ -29,7 +29,6 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 # initialize the video stream, allow the cammera sensor to warmup,
 # and initialize the FPS counter
 print("[INFO] starting video stream...")
-<<<<<<< HEAD
 #vs = VideoStream(src=0).start()
 vs = cv2.VideoCapture('video3.mp4')
 vs.set(cv2.CAP_PROP_FPS, 5)
@@ -44,20 +43,6 @@ while True:
 	success,frame = vs.read()
 	#print("Read a new frame: ",success)
 	frame = imutils.resize(frame,640,480)
-=======
-#vs = VideoStream('video1.mp4').start()
-vs = cv2.VideoCapture('video3.mp4')
-vs.set(cv2.CAP_PROP_FPS, 120)
-#time.sleep(2.0)
-#fps = FPS().start()
-# loop over the frames from the video stream
-while True:
-	# grab the frame from the threaded video stream and resize it
-	# to have a maximum width of 400 pixels
-	success,frame = vs.read()
-	#print("Read a new frame: ",success)
-	frame = imutils.resize(frame)
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 
 	# grab the frame dimensions and convert it to a blob
 	(h, w) = frame.shape[:2]
@@ -69,11 +54,8 @@ while True:
 	net.setInput(blob)
 	detections = net.forward()
 		# loop over the detections
-<<<<<<< HEAD
 	frame_vehicles = 0
 	frame_people = 0
-=======
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 	for i in np.arange(0, detections.shape[2]):
 		# extract the confidence (i.e., probability) associated with
 		# the prediction
@@ -87,10 +69,7 @@ while True:
 			# the bounding box for the object
 			idx = int(detections[0, 0, i, 1])
 			if(idx in [2,6,7,14]):
-<<<<<<< HEAD
 				frame_vehicles+=1
-=======
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 				box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 				(startX, startY, endX, endY) = box.astype("int")
 
@@ -100,28 +79,18 @@ while True:
 				y = startY - 15 if startY - 15 > 15 else startY + 15
 				cv2.putText(frame, label, (startX, y),cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 			elif(idx==15):
-<<<<<<< HEAD
 				frame_people+=1
-=======
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 				box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 				(startX, startY, endX, endY) = box.astype("int")
 
 				# draw the prediction on the frame
-<<<<<<< HEAD
 				label = "{}: {:.2f}%".format("Person",confidence * 100)
-=======
-				label = "{}: {:.2f}%".format("Vehicle",confidence * 100)
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 				cv2.rectangle(frame, (startX, startY), (endX, endY),COLORS[idx], 2)
 				y = startY - 15 if startY - 15 > 15 else startY + 15
 				cv2.putText(frame, label, (startX, y),cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 	# show the output frame
-<<<<<<< HEAD
 	print("Number of frame pedestrians=", frame_people)
 	print(" Number of frame vehicles=",frame_vehicles)
-=======
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
 
@@ -137,9 +106,6 @@ while True:
 #print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # do a bit of cleanup
-<<<<<<< HEAD
 #vs.stop()
-=======
->>>>>>> 6f4a9035ae578ac5e1fe4a30ef905f30950d39e8
 cv2.destroyAllWindows()
 vs.release()
