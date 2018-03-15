@@ -33,7 +33,7 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 #To use the webcam set this variable to 1
 web_cam = 0
 print("[INFO] starting video stream...")
-if web_cam:
+if web_cam not in [0]:
 	vs = VideoStream(src=0).start()
 	time.sleep(2.0)
 	fps = FPS().start()
@@ -47,8 +47,11 @@ while True:
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
 	frame_count +=1
-	frame = vs.read()
-	#print("Read a new frame: ",success)
+	if web_cam:
+		frame = vs.read()
+	else:
+		success,frame = vs.read()
+	#print("Read a new frame: ",success)	
 	frame = imutils.resize(frame,640,480)
 
 	# grab the frame dimensions and convert it to a blob
