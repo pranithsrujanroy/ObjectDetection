@@ -6,6 +6,7 @@ import argparse
 import imutils
 import time
 import cv2
+import random
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--prototxt", required=True,
@@ -31,7 +32,7 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
 
 #To use the webcam set this variable to 1
-web_cam = 0
+web_cam = 1
 print("[INFO] starting video stream...")
 if web_cam not in [0]:
 	vs = VideoStream(src=0).start()
@@ -43,10 +44,29 @@ else:
 #
 # loop over the frames from the video stream
 frame_count = 0
+people = 0
+vehicles = 0
+t1 = time.clock()
 while True:
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
-	frame_count +=1
+	t2 = time.clock()-t1
+	if t2>=60:
+		print("Number of pedestrians in one minute =", people)
+		print(" Number of vehicles in one minute =",vehicles)
+		print("Number of frames processed=",frame_count)
+		accident = random.randint(0,2)
+		geocode = random.randint(1,11)
+		if accident:
+			area = random.randint(10,101)
+		construction = random.randint(0,2)
+		if construction:
+			duration = random.randint(4,10)
+		frame_count = 0
+		people = 0
+		vehicles = 0
+		t1 = time.clock()
+	frame_count += 1
 	if web_cam:
 		frame = vs.read()
 	else:
@@ -59,13 +79,14 @@ while True:
 	blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
 		0.007843, (300, 300), 127.5)
 
+	prev_people_count = 0
+	prev_vehicle_count = 0
+
 	# pass the blob through the network and obtain the detections and
 	# predictions
 	net.setInput(blob)
 	detections = net.forward()
 		# loop over the detections
-	frame_vehicles = 0
-	frame_people = 0
 	for i in np.arange(0, detections.shape[2]):
 		# extract the confidence (i.e., probability) associated with
 		# the prediction
@@ -79,7 +100,7 @@ while True:
 			# the bounding box for the object
 			idx = int(detections[0, 0, i, 1])
 			if(idx in [2,6,7,14]):
-				frame_vehicles+=1
+				prev_vehicle_count +=1
 				box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 				(startX, startY, endX, endY) = box.astype("int")
 
@@ -89,7 +110,7 @@ while True:
 				y = startY - 15 if startY - 15 > 15 else startY + 15
 				cv2.putText(frame, label, (startX, y),cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 			elif(idx==15):
-				frame_people+=1
+				prev_people_count+=1
 				box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 				(startX, startY, endX, endY) = box.astype("int")
 
@@ -98,9 +119,17 @@ while True:
 				cv2.rectangle(frame, (startX, startY), (endX, endY),COLORS[idx], 2)
 				y = startY - 15 if startY - 15 > 15 else startY + 15
 				cv2.putText(frame, label, (startX, y),cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+
+	if people - prev_people_count > 2:
+		people += people -prev_people_count
+	elif people == 0:
+		people = prev_people_count
+	if vehicles - prev_vehicle_count > 2:
+		vehicles += vehicles - prev_vehicle_count
+	elif vehicles == 0:
+		vehicles = prev_vehicle_count
+
 	# show the output frame
-	print("Number of frame pedestrians=", frame_people)
-	print(" Number of frame vehicles=",frame_vehicles)
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
 
@@ -117,6 +146,7 @@ if web_cam:
 	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 	vs.stop()
 
+if web_cam==0:
+	vs.release()
 # do a bit of cleanup
 cv2.destroyAllWindows()
-vs.release()
